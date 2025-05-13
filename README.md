@@ -13,26 +13,13 @@ This implementatrion also provides unit tests with a mocked repository.
 
 ## How to execute
 
-1. Basic:
+Just run the `SettlementBookingSystem` project and make a POST request:
 
 ```
-curl --request POST \
-  --url https://localhost:44355/BasicBooking \
-  --header 'Content-Type: application/json' \
-  --data '{
-	"bookingTime": "09:00",
-	"name": "Keith"
-}'
-```
-
-2. Mediator
-
-```
-curl --request POST \
-  --url https://localhost:44355/MediatorBooking \
-  --header 'Content-Type: application/json' \
-  --data '{
-	"bookingTime": "09:30",
-	"name": "John"
+curl --location 'https://localhost:5001/booking' \
+--header 'Content-Type: application/json' \
+--data '{
+    "name": "Keith",
+    "bookingTime": "09:00"
 }'
 ```
