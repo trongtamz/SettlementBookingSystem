@@ -4,6 +4,7 @@ using Moq;
 using SettlementBookingSystem.Application.Bookings.Commands;
 using SettlementBookingSystem.Application.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -22,7 +23,7 @@ namespace SettlementBookingSystem.Application.UnitTests
             };
 
             var bookingRepoMock = new Mock<IBookingRepository>();
-            bookingRepoMock.Setup(r => r.GetBookingCount("09:15")).Returns(0);
+            bookingRepoMock.Setup(r => r.GetAllBookings()).Returns(new Dictionary<string, IEnumerable<Guid>>());
 
             var handler = new CreateBookingCommandHandler(bookingRepoMock.Object);
 
@@ -58,8 +59,16 @@ namespace SettlementBookingSystem.Application.UnitTests
                 BookingTime = "09:15",
             };
 
+            var existingBookings = new Dictionary<string, IEnumerable<Guid>>
+            {
+                { "09:00", new[] { Guid.NewGuid() } },
+                { "09:10", new[] { Guid.NewGuid() } },
+                { "09:20", new[] { Guid.NewGuid() } },
+                { "09:30", new[] { Guid.NewGuid() } }
+            };
+
             var bookingRepoMock = new Mock<IBookingRepository>();
-            bookingRepoMock.Setup(r => r.GetBookingCount("09:15")).Returns(4);
+            bookingRepoMock.Setup(r => r.GetAllBookings()).Returns(existingBookings);
 
             var handler = new CreateBookingCommandHandler(bookingRepoMock.Object);
 

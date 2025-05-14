@@ -4,6 +4,7 @@ using SettlementBookingSystem.Application.Bookings.Dtos;
 using SettlementBookingSystem.Application.Exceptions;
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,9 +33,25 @@ namespace SettlementBookingSystem.Application.Bookings.Commands
             if (bookingTime < Start || bookingTime > End - Duration)
                 throw new ValidationException("BookingTime is out of business hours (09:00-16:00).");
 
+            var newSlotStart = bookingTime;
+            var newSlotEnd = bookingTime + Duration;
+
+            int overlapCount = 0;
+            foreach (var existingSlot in bookingMemory.Keys)
+            {
+                if (TimeSpan.TryParseExact(existingSlot, "hh\\:mm", CultureInfo.InvariantCulture, out var existingStart))
+                {
+                    var existingEnd = existingStart + Duration;
+                    if (existingStart < newSlotEnd && newSlotStart < existingEnd)
+                    {
+                        overlapCount += bookingMemory[existingSlot].Count();
+                        if (overlapCount >= MaxSimultaneousBookings)
+                            throw new ConflictException("All settlements at this booking time are reserved.");
+                    }
+                }
+            }
+
             var slot = request.BookingTime;
-            if (_bookingRepository.GetBookingCount(slot) >= MaxSimultaneousBookings)
-                throw new ConflictException("All settlements at this booking time are reserved.");
 
             var booking = new BookingDto();
             _bookingRepository.AddBooking(slot, booking.BookingId);
